@@ -1,0 +1,55 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 24px;
+}
+
+.name {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.grid {
+    display: flex;
+    flex-wrap: wrap; 
+    width: 300px; 
+}
+
+.row1, .row2, .row3 {
+    display: flex; 
+}
+
+.row1 > div, .row2 > div, .row3 > div {
+    width: 100px;
+    height: 100px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+}
+
+.player1win, .player2win, .tie {
+    border-radius: 5px;
+    border: 1px solid blue;
+    background-color: aliceblue;
+    display: none;
+    padding: 32px;
+}
+
+.content {
+    display: flex;
+    gap: 4px;
+}
+
+.wintext1, .wintext2, .tietext {
+    font-size: 18px;
+    width: 200px;
+}
+
+.currPlayer {
+    border-radius: 5px;
+    font-size: 18px;
+}

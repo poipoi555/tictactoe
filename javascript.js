@@ -1,3 +1,4 @@
+
 let board = [
     ["", "", ""], 
     ["", "", ""],
@@ -10,11 +11,14 @@ function clearBoard() {
         ["", "", ""],
         ["", "", ""]   
     ];
+    const squares = document.querySelectorAll(".row1 > div, .row2 > div, .row3 > div");
+    squares.forEach(square => square.textContent = "");
 }
 
 let isGameOver = false;
 let player1;
 let player2;
+let isPlayer1Turn = true;
 
 startGame();
 
@@ -42,54 +46,78 @@ function startGame() {
     }
     player2 = createPlayer(p2Name, sign2);
 
+    setUpBoard();
     checkPlayerTurn();
+}
+
+function setUpBoard() {
+    const squares = document.querySelectorAll(".row1 > div, .row2 > div, .row3 > div");
+    squares.forEach(square => {
+        // remove old listeners 
+        square.replaceWith(square.cloneNode(true));
+    });
+
+    // add new listeners
+    document.querySelectorAll(".row1 > div, .row2 > div, .row3 > div")
+            .forEach(square => square.addEventListener("click", handleMove));
+}
+
+
+function handleMove(event) {
+    if (!isGameOver) {
+        let currentPlayer = null;
+        if (isPlayer1Turn) {
+            currentPlayer = player1;
+        }
+        else {
+            currentPlayer = player2;
+        }
+        const row = parseInt(event.target.classList[0].charAt(1));
+        const column = parseInt(event.target.classList[0].charAt(3));
+        const name = currentPlayer.name;
+        const sign = currentPlayer.sign;
+
+        console.log(`${name}'s move: `);
+        console.log(`Row: ${row}`);
+        console.log(`Column: ${column}`);
+
+        move(row, column, sign, name);
+    }
+    else {
+        return;
+    }
 }
 
 
 // happens once for first turn, switchTurn() used for subsequent turns
 function checkPlayerTurn() {
-    const firstSecond = prompt("Who goes first?");
+    const firstSecond = prompt("Who goes first?").toUpperCase();
 
-    if (firstSecond === "Player 1" || firstSecond === "player 1") {
+    if (firstSecond === "PLAYER 1") {
         console.log("Player 1 goes first");
-        player1();
+        let currPlayer = document.querySelector(".currplayer");
+        currPlayer.textContent = "Player 1's turn";
+        isPlayer1Turn = true;
     } 
     else {
         console.log("Player 2 goes first");
-        player2();
+        let currPlayer = document.querySelector(".currplayer");
+        currPlayer.textContent = "Player 2's turn";
+        isPlayer1Turn = false;
     }
 }
 
 
 function createPlayer(name, sign) {
     if (sign === "X" || sign === "O") {
-        return function() {
-            if (isGameOver === false) {
-                // player 1's turn
-                if (name === "Player 1") {
-                    console.log(`${name}'s move: `);
-                    const playerRow = Number(prompt("Row: "));
-                    console.log(`Row: ${playerRow}`);
-                    const playerColumn = Number(prompt("Column: "));
-                    console.log(`Column: ${playerColumn}`);
-
-                    return move(playerRow, playerColumn, sign, name);
-                }
-                // player 2's turn
-                else {
-                    console.log(`${name}'s move: `);
-                    const playerRow = prompt("Row: ");
-                    console.log(`Row: ${playerRow}`);
-                    const playerColumn = prompt("Column: ");
-                    console.log(`Column: ${playerColumn}`);
-
-                    return move(playerRow, playerColumn, sign, name);
-                }
-            }
-        }
+        return {
+            name: name,
+            sign: sign
+        };
     }
     else {
         console.log("Invalid input");
+        return;
     }
 }
 
@@ -97,42 +125,82 @@ function createPlayer(name, sign) {
 function move(row, column, playerSign, name) {
     if (board[row][column] === "") {
         board[row][column] = playerSign;
+        const square = document.querySelector(`.r${row}b${column}`);
+        square.textContent = playerSign;
+
         console.log(`Row ${row}, Column ${column} chosen by ${playerSign}`);
 
         let hasWinner = checkForWin(playerSign);
         let hasTie = checkForTie();
 
         if (hasWinner === true) {
+            if (name === "Player 1") {
+                const popup = document.querySelector(".player1win");
+                popup.style.display = "block";
+
+                const restart = document.querySelector(".restart1");
+                restart.addEventListener("click", () => {
+                    console.log("Starting new game...");
+                    popup.style.display = "none";
+                    startNewGame();
+                });
+
+                const end = document.querySelector(".close1");
+                end.addEventListener("click", () => {
+                    popup.style.display = "none";
+                    console.log("Goodbye!");
+                });
+            }
+            else {
+                const popup = document.querySelector(".player2win");
+                popup.style.display = "block";
+
+                const restart = document.querySelector(".restart2");
+                restart.addEventListener("click", () => {
+                    console.log("Starting new game...");
+                    popup.style.display = "none";
+                    startNewGame();
+                });
+
+                const end = document.querySelector(".close2");
+                end.addEventListener("click", () => {
+                    popup.style.display = "none";
+                    console.log("Goodbye!");
+                });
+            }
             console.log(`Winner: ${name} (${playerSign})`);
             isGameOver = true;
-            clearBoard();
-            const restart = prompt("Would you like to play again?").toUpperCase();
-
-            if (restart === "YES") {
-                console.log("Starting new game...");
-                startNewGame();
-            }
-            else {
-                console.log("Goodbye!");
-            }
         }
         else if (hasTie === true) {
+            const popup = document.querySelector(".tie");
+            popup.style.display = "block";
+
+            const restart = document.querySelector(".restartT");
+            restart.addEventListener("click", () => {
+                console.log("Starting new game...");
+                popup.style.display = "none";
+                startNewGame();
+            });
+
+            const end = document.querySelector(".closeT");
+            end.addEventListener("click", () => {
+                popup.style.display = "none";
+                console.log("Goodbye!");
+            });
+
             console.log("Tie!");
             isGameOver = true;
-            clearBoard();
-            const restart = prompt("Would you like to play again?").toUpperCase();
-
-            if (restart === "YES") {
-                console.log("Starting new game...");
-                startNewGame();
-            }
-            else {
-                console.log("Goodbye!");
-            }
         }
         // if game still ongoing (no tie or win)
         else {
-            switchTurn(name);
+            let currPlayer = document.querySelector(".currplayer");
+            if (name === "Player 1") {
+                currPlayer.textContent ="Player 2's turn";
+            }
+            else {
+                currPlayer.textContent ="Player 1's turn";
+            } 
+            switchTurn();
         }
     } 
     else {
@@ -142,13 +210,8 @@ function move(row, column, playerSign, name) {
 }
 
 
-function switchTurn(name) {
-    if (name === "Player 1") {
-        player2();
-    }
-    else {
-        player1();
-    }
+function switchTurn() {
+    isPlayer1Turn = !isPlayer1Turn;
 }
 
 
@@ -194,6 +257,7 @@ function startNewGame() {
     isGameOver = false;
     startGame();
 }
+
 
 
 
